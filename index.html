@@ -711,10 +711,7 @@
     transition: max-height var(--transition-medium);
         }
 
-/* Expanded max-height is managed inline for accurate height; no fixed magic number here */
-        .collapsible-content.expanded {
-    /* max-height set via JS to content.scrollHeight, then 'none' after transition */
-        }
+/* Expanded max-height handled via JS; no empty CSS ruleset required */
 
         .expand-icon {
     transition: transform var(--transition-medium);
@@ -2805,6 +2802,9 @@
                 fullViewImage = null;
                 previewImg.src = '';
                 colorPalette.innerHTML = '';
+                // Clear any gradient palette carried from a previous image
+                lastGradientPalette = [];
+                if (gradientPreview) gradientPreview.style.background = '';
                 
                 // Reset upload preview
                 if (uploadPreview) {
@@ -4492,6 +4492,7 @@
                 let animationFrameId = 0;
                 let lastFrameTime = 0;
                 const frameInterval = 1000 / fps;
+                let ended = false;
 
                 const drawFrame = (now) => {
                     // More precise frame timing for smoother animation
@@ -4528,6 +4529,10 @@
 
                     if (now < endTime) {
                         animationFrameId = requestAnimationFrame(drawFrame);
+                    } else if (!ended) {
+                        ended = true;
+                        // Stop the recorder on the next animation frame to ensure the last frame is encoded
+                        requestAnimationFrame(() => { try { recorder.stop(); } catch (_) {} });
                     }
                 };
 
@@ -4554,27 +4559,11 @@
                 
                 animationFrameId = requestAnimationFrame(drawFrame);
 
-                // Wait for the full duration plus a buffer for the final frames
-                await new Promise((resolve) => setTimeout(resolve, durationSec * 1000 + 200));
-                
-                if (animationFrameId) cancelAnimationFrame(animationFrameId);
-                
-                // Draw final frame (back to left position)
-                ctx.clearRect(0, 0, viewportWidth, viewportHeight);
-                ctx.drawImage(
-                    sourceBitmap,
-                    0, centerOffsetY, viewportWidth, viewportHeight,
-                    0, 0, viewportWidth, viewportHeight
-                );
-                // Apply watermark to final frame
-                applyWatermark(canvas, ctx, wmSettings);
-                
-                // Small delay before stopping to capture final frame
-                await new Promise(resolve => setTimeout(resolve, 100));
-                try { recorder.stop(); } catch (_) {}
-                stream.getTracks().forEach(track => track.stop());
-
+                // Let RAF loop run and stop itself; wait for onstop
                 await stopped;
+                // Now stop tracks and free resources
+                try { stream.getTracks().forEach(track => track.stop()); } catch(_) {}
+                try { if (sourceBitmap && typeof sourceBitmap.close === 'function') sourceBitmap.close(); } catch(_) {}
                 let blob = new Blob(chunks, { type: mimeType });
                 const actualIsMp4 = mimeType.startsWith('video/mp4');
                 if (requestedFormat === 'mp4' && !actualIsMp4) {
