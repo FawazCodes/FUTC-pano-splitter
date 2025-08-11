@@ -305,14 +305,14 @@
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), var(--shadow-sm);
         }
 
-.info-box {
-    background: var(--glass-secondary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    padding: 0.875rem 1.125rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+        .info-box {
+            background: var(--glass-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 0.875rem 1.125rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
     box-shadow: var(--shadow-sm);
     font-size: 0.875rem;
     color: var(--text-muted);
@@ -711,8 +711,9 @@
     transition: max-height var(--transition-medium);
         }
 
+/* Expanded max-height is managed inline for accurate height; no fixed magic number here */
         .collapsible-content.expanded {
-            max-height: 1000px;
+    /* max-height set via JS to content.scrollHeight, then 'none' after transition */
         }
 
         .expand-icon {
@@ -776,13 +777,13 @@
             50% { opacity: 1; }
         }
 
-.bottom-sheet {
+        .bottom-sheet {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-bottom: none;
             border-radius: var(--radius-xl) var(--radius-xl) 0 0;
             transform: translateY(100%);
@@ -924,7 +925,7 @@
             transform: rotate(45deg);
         }
 
-.lightbox {
+        .lightbox {
             position: fixed;
             inset: 0;
     background: rgba(0, 0, 0, 0.9);
@@ -959,12 +960,12 @@
     transition: transform var(--transition-medium);
         }
 
-.lightbox-nav {
+        .lightbox-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
     background: var(--glass-secondary);
-    border: 1px solid var(--glass-border);
+            border: 1px solid var(--glass-border);
             border-radius: 50%;
             width: 48px;
             height: 48px;
@@ -1001,12 +1002,12 @@
             height: 20px;
         }
 
-.lightbox-close {
+        .lightbox-close {
             position: absolute;
             top: 2rem;
             right: 2rem;
     background: var(--glass-secondary);
-    border: 1px solid var(--glass-border);
+            border: 1px solid var(--glass-border);
             border-radius: 50%;
             width: 48px;
             height: 48px;
@@ -1031,13 +1032,13 @@
             height: 24px;
         }
 
-.lightbox-info {
+        .lightbox-info {
             position: absolute;
             bottom: 2rem;
             left: 50%;
             transform: translateX(-50%);
     background: var(--glass-secondary);
-    border: 1px solid var(--glass-border);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
             padding: 1rem 1.5rem;
             display: flex;
@@ -1080,9 +1081,9 @@
 
         .radio-group input[type="radio"]:checked + label,
         .radio-group label:has(input[type="radio"]:checked) {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
         }
 
         .radio-group label {
@@ -1098,20 +1099,20 @@
             background: rgba(102, 126, 234, 0.05);
         }
 
-[data-theme="light"] input[type="text"],
-[data-theme="light"] select,
+        [data-theme="light"] input[type="text"],
+        [data-theme="light"] select,
 [data-theme="light"] input[type="color"],
 [data-theme="light"] input[type="number"],
 [data-theme="light"] input[type="range"] {
     background: #ffffff;
-    border-color: rgba(100, 116, 139, 0.3);
-    color: var(--text-primary);
-}
+            border-color: rgba(100, 116, 139, 0.3);
+            color: var(--text-primary);
+        }
 
         [data-theme="light"] input[type="text"]:focus,
         [data-theme="light"] select:focus,
         [data-theme="light"] input[type="color"]:focus {
-    border-color: #3b82f6;
+            border-color: #3b82f6;
     background: #ffffff;
         }
 
@@ -1351,12 +1352,12 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
         }
 
-.copy-button {
+        .copy-button {
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
     background: var(--glass-secondary);
-    border: 1px solid var(--glass-border);
+            border: 1px solid var(--glass-border);
             border-radius: var(--radius-md);
             width: 32px;
             height: 32px;
@@ -2976,8 +2977,12 @@
                     if (expanded) {
                         content.classList.add('expanded');
                         icon?.classList.add('expanded');
-                        content.style.maxHeight = content.scrollHeight + 'px';
+                        // Set explicit height for transition, then remove to allow intrinsic growth
+                        const full = content.scrollHeight + 'px';
+                        content.style.maxHeight = full;
                         content.style.transition = 'max-height 350ms cubic-bezier(0.4, 0, 0.2, 1)';
+                        // After transition, allow natural expansion without clipping
+                        setTimeout(() => { if (content.classList.contains('expanded')) content.style.maxHeight = 'none'; }, 360);
                     } else {
                         content.classList.remove('expanded');
                         icon?.classList.remove('expanded');
@@ -3395,13 +3400,8 @@
                         const bgRadio = document.querySelector(`input[name="bg-type"][value="${settings.bgType}"]`);
                         if (bgRadio) {
                             bgRadio.checked = true;
-                            // Trigger change event to update UI
-                            const isBlur = settings.bgType === 'blur';
-                            const isColor = settings.bgType === 'color';
-                            const isGradient = settings.bgType === 'gradient';
-                            blurControls.style.display = isBlur ? 'block' : 'none';
-                            colorControls.style.display = isColor ? 'block' : 'none';
-                            if (gradientControls) gradientControls.style.display = isGradient ? 'block' : 'none';
+                            // Dispatch change so all dependent UI and listeners update cohesively
+                            try { bgRadio.dispatchEvent(new Event('change', { bubbles: true })); } catch(_) {}
                         }
                     }
                     
@@ -3456,14 +3456,8 @@
                             typeRadio.checked = true;
                             currentWatermarkType = settings.watermarkType;
                             updateWatermarkTypeRadioStyling();
-                            
-                            // Show appropriate controls
-                            if (currentWatermarkType === 'text') {
-                                textWatermarkControls.classList.remove('hidden');
-                                watermarkSettings.classList.remove('hidden');
-                            } else if (currentWatermarkType === 'image') {
-                                imageWatermarkControls.classList.remove('hidden');
-                            }
+                            // Drive UI through the same handler logic
+                            try { typeRadio.dispatchEvent(new Event('change', { bubbles: true })); } catch(_) {}
                         }
                     }
                     
@@ -3499,6 +3493,7 @@
                         const textPositionRadio = document.querySelector(`input[name="text-watermark-position"][value="${settings.textWatermarkPosition}"]`);
                         if (textPositionRadio) {
                             textPositionRadio.checked = true;
+                            try { textPositionRadio.dispatchEvent(new Event('change', { bubbles: true })); } catch(_) {}
                         }
                     }
                     
@@ -3524,7 +3519,8 @@
                         watermarkTextStroke.value = settings.watermarkTextStroke;
                     }
                     
-                    console.log('Settings loaded successfully');
+                    // Update preview if an image is already loaded
+                    if (originalImage) updateFullViewPreview();
                 } catch (e) {
                     console.warn('Failed to load settings from localStorage:', e);
                 }
@@ -4407,7 +4403,8 @@
                 ease: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
                 'ease-in': (t) => t * t,
                 'ease-out': (t) => t * (2 - t),
-                'ease-in-out': (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+                // Smooth continuous back-and-forth (no jerk at midpoint)
+                'ease-in-out': (t) => 0.5 - 0.5 * Math.cos(Math.PI * t), // cosine ease
                 smooth: (t) => t * t * (3 - 2 * t), // smoothstep
                 bounce: (t) => {
                     const n1 = 7.5625;
@@ -4508,18 +4505,9 @@
                     const elapsed = now - startTime;
                     let t = Math.max(0, Math.min(1, elapsed / (durationSec * 1000)));
                     
-                    // Apply easing to the time value
-                    t = easingFunc(t);
-                    
-                    // Triangular wave: starts at 0 (left), goes to 1 (right) at midpoint, back to 0 (left) at end
-                    let phase;
-                    if (t <= 0.5) {
-                        // First half: 0 -> 1 (left to right)
-                        phase = t * 2;
-                    } else {
-                        // Second half: 1 -> 0 (right to left)
-                        phase = 2 - (t * 2);
-                    }
+                    // Use sinusoidal ping-pong to avoid harsh reversals
+                    // phase goes 0->1->0 smoothly with continuous velocity
+                    const phase = 0.5 * (1 - Math.cos(2 * Math.PI * t));
                     
                     // Use sub-pixel positioning for smoother movement
                     const offsetX = phase * maxOffsetX;
@@ -4598,6 +4586,7 @@
                         currentVideoExt = 'mp4';
                     } catch (e) {
                         console.warn('Transcode to MP4 failed, staying on WebM:', e);
+                        showError('Could not export MP4 in your browser. Exported WebM instead.');
                         if (uiFormatLabel) uiFormatLabel.textContent = 'WebM';
                         currentVideoExt = 'webm';
                     }
@@ -4763,6 +4752,25 @@
                     bottomSheetBackdrop.classList.remove('open');
                     mobileFab.classList.remove('open');
                     document.body.style.overflow = '';
+                    // Move content back to desktop cards
+                    try {
+                        const slicingNode = mobileSlicingContent?.firstElementChild;
+                        if (slicingNode && controls) {
+                            const dest = controls.querySelector('.p-6') || controls;
+                            dest.appendChild(slicingNode);
+                        }
+                        const bgNode = mobileBackgroundContent?.firstElementChild;
+                        if (bgNode && fullViewSettings) {
+                            const dest = fullViewSettings.querySelector('#full-view-content') || fullViewSettings;
+                            dest.appendChild(bgNode);
+                        }
+                        const videoNode = mobileVideoContent?.firstElementChild;
+                        if (videoNode && videoSettings) {
+                            const dest = videoSettings.querySelector('#video-content') || videoSettings;
+                            dest.appendChild(videoNode);
+                        }
+                        lucide.createIcons();
+                    } catch (_) {}
                 }
 
                 // Haptic feedback
@@ -4772,294 +4780,29 @@
             };
 
             const populateBottomSheetContent = () => {
-                // Clear existing content first
-                if (mobileSlicingContent) mobileSlicingContent.innerHTML = '';
-                if (mobileBackgroundContent) mobileBackgroundContent.innerHTML = '';
-                if (mobileVideoContent) mobileVideoContent.innerHTML = '';
-
-                // Clone and populate slicing settings
+                // Move live nodes into the sheet instead of cloning
                 if (mobileSlicingContent && controls) {
-                    const controlsContent = controls.querySelector('.p-6');
-                    if (controlsContent) {
-                        const clonedControls = controlsContent.cloneNode(true);
-                        clonedControls.classList.add('mobile-show-in-sheet');
-                        mobileSlicingContent.appendChild(clonedControls);
-                        
-                        // Re-sync high resolution toggle (correct ID)
-                        const clonedHighResToggle = clonedControls.querySelector('#high-res-toggle');
-                        if (clonedHighResToggle && highResToggle) {
-                            clonedHighResToggle.id = 'mobile-high-res-toggle';
-                            clonedHighResToggle.checked = highResToggle.checked;
-                            clonedHighResToggle.addEventListener('change', (e) => {
-                                highResToggle.checked = e.target.checked;
-                                saveSettings();
-                                if (originalImage) updateImageDetails();
-                            });
-                        }
-
-                        // Re-bind cloned process/reset buttons to originals to avoid duplicate IDs and dead buttons
-                        const clonedProcessBtn = clonedControls.querySelector('#process-btn');
-                        if (clonedProcessBtn && processBtn) {
-                            clonedProcessBtn.id = 'mobile-process-btn';
-                            clonedProcessBtn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                processBtn.click();
-                            });
-                        }
-                        const clonedResetBtn = clonedControls.querySelector('#reset-btn');
-                        if (clonedResetBtn && resetBtn) {
-                            clonedResetBtn.id = 'mobile-reset-btn';
-                            clonedResetBtn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                resetBtn.click();
-                            });
-                        }
+                    const src = controls.querySelector('.p-6');
+                    if (src) {
+                        mobileSlicingContent.innerHTML = '';
+                        mobileSlicingContent.appendChild(src);
                     }
                 }
-
-                // Clone and populate background settings
                 if (mobileBackgroundContent && fullViewSettings) {
-                    const backgroundContent = fullViewSettings.querySelector('#full-view-content .p-6');
-                    if (backgroundContent) {
-                        const clonedBackground = backgroundContent.cloneNode(true);
-                        clonedBackground.classList.add('mobile-show-in-sheet');
-                        mobileBackgroundContent.appendChild(clonedBackground);
-                        
-                        // Update IDs to avoid conflicts
-                        const clonedBgRadios = clonedBackground.querySelectorAll('input[name="bg-type"]');
-                        const clonedBlurSlider = clonedBackground.querySelector('#blur-intensity');
-                        const clonedBlurDownscale = clonedBackground.querySelector('#blur-downscale');
-                        const clonedColorPicker = clonedBackground.querySelector('#bg-color-picker');
-                        const clonedGradientType = clonedBackground.querySelector('#gradient-type');
-                        const clonedGradientStops = clonedBackground.querySelector('#gradient-stops');
-                        const clonedGradientBlend = clonedBackground.querySelector('#gradient-blend');
-                        const clonedPaletteBtn = clonedBackground.querySelector('#palette-from-image');
-                        const clonedGradientPreview = clonedBackground.querySelector('#gradient-preview');
-                        const clonedWatermarkInputs = clonedBackground.querySelectorAll('input[name="watermark-type"], input[name="watermark-position"]');
-                        
-                        // Update IDs and sync values
-                        if (clonedBlurSlider) {
-                            clonedBlurSlider.id = 'mobile-blur-intensity';
-                            clonedBlurSlider.value = blurIntensity.value;
-                        }
-                        if (clonedBlurDownscale) {
-                            clonedBlurDownscale.id = 'mobile-blur-downscale';
-                            clonedBlurDownscale.value = blurDownscale?.value || '35';
-                        }
-                        if (clonedColorPicker) {
-                            clonedColorPicker.id = 'mobile-bg-color-picker';
-                            clonedColorPicker.value = bgColorPicker.value;
-                        }
-                        if (clonedGradientType) {
-                            clonedGradientType.id = 'mobile-gradient-type';
-                            clonedGradientType.value = gradientType?.value || 'radial';
-                        }
-                        if (clonedGradientStops) {
-                            clonedGradientStops.id = 'mobile-gradient-stops';
-                            clonedGradientStops.value = gradientStops?.value || '4';
-                        }
-                        if (clonedGradientBlend) {
-                            clonedGradientBlend.id = 'mobile-gradient-blend';
-                            clonedGradientBlend.value = gradientBlend?.value || 'normal';
-                        }
-                        
-                        // Sync radio button states
-                        clonedBgRadios.forEach((radio, index) => {
-                            radio.id = `mobile-bg-${radio.value}`;
-                            const originalRadio = document.querySelector(`input[name="bg-type"][value="${radio.value}"]`);
-                            if (originalRadio) {
-                                radio.checked = originalRadio.checked;
-                            }
-                        });
-                        
-                        // Sync watermark states
-                        clonedWatermarkInputs.forEach(input => {
-                            const originalInput = document.querySelector(`input[name="${input.name}"][value="${input.value}"]`);
-                            if (originalInput) {
-                                input.checked = originalInput.checked;
-                                input.id = `mobile-${input.id}`;
-                            }
-                        });
-                        
-                        // Re-bind event listeners with proper sync
-                        clonedBgRadios.forEach(radio => {
-                            radio.addEventListener('change', (e) => {
-                                const originalRadio = document.querySelector(`input[name="bg-type"][value="${e.target.value}"]`);
-                                if (originalRadio) {
-                                    originalRadio.checked = true;
-                                    originalRadio.dispatchEvent(new Event('change'));
-                                }
-                                saveSettings();
-                            });
-                        });
-                        
-                        if (clonedBlurSlider) {
-                            clonedBlurSlider.addEventListener('input', (e) => {
-                                blurIntensity.value = e.target.value;
-                                blurIntensity.dispatchEvent(new Event('input'));
-                                saveSettings();
-                            });
-                        }
-                        
-                        if (clonedColorPicker) {
-                            clonedColorPicker.addEventListener('input', (e) => {
-                                bgColorPicker.value = e.target.value;
-                                bgColorPicker.dispatchEvent(new Event('input'));
-                                saveSettings();
-                            });
-                        }
-                        if (clonedBlurDownscale) {
-                            clonedBlurDownscale.addEventListener('input', (e) => {
-                                if (blurDownscale) blurDownscale.value = e.target.value;
-                                if (originalImage) updateFullViewPreview();
-                                saveSettings();
-                            });
-                        }
-                        if (clonedGradientType) {
-                            clonedGradientType.addEventListener('change', (e) => {
-                                if (gradientType) gradientType.value = e.target.value;
-                                if (originalImage) updateFullViewPreview();
-                                saveSettings();
-                            });
-                        }
-                        if (clonedGradientStops) {
-                            clonedGradientStops.addEventListener('input', (e) => {
-                                if (gradientStops) gradientStops.value = e.target.value;
-                                if (originalImage) updateFullViewPreview();
-                                saveSettings();
-                            });
-                        }
-                        if (clonedGradientBlend) {
-                            clonedGradientBlend.addEventListener('change', (e) => {
-                                if (gradientBlend) gradientBlend.value = e.target.value;
-                                if (originalImage) updateFullViewPreview();
-                                saveSettings();
-                            });
-                        }
-                        if (clonedPaletteBtn) {
-                            clonedPaletteBtn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                if (originalImage) {
-                                    const colors = extractPaletteKMeans(originalImage.element, parseInt((gradientStops?.value || '4'), 10));
-                                    updateGradientPreview(colors);
-                                    if (originalImage) updateFullViewPreview();
-                                }
-                            });
-                        }
+                    const src = fullViewSettings.querySelector('#full-view-content .p-6');
+                    if (src) {
+                        mobileBackgroundContent.innerHTML = '';
+                        mobileBackgroundContent.appendChild(src);
                     }
                 }
-
-                // Clone and populate video settings
                 if (mobileVideoContent && videoSettings) {
-                    const videoContent = videoSettings.querySelector('#video-content .p-6');
-                    if (videoContent) {
-                        const clonedVideo = videoContent.cloneNode(true);
-                        clonedVideo.classList.add('mobile-show-in-sheet');
-                        mobileVideoContent.appendChild(clonedVideo);
-                        
-                        // Update IDs and sync values
-                        const clonedVideoFormat = clonedVideo.querySelector('#video-format');
-                        const clonedVideoEasing = clonedVideo.querySelector('#video-easing');
-                        const clonedVideoDuration = clonedVideo.querySelector('#video-duration');
-                        const clonedVideoFps = clonedVideo.querySelector('#video-fps');
-                        const clonedVideoQuality = clonedVideo.querySelector('#video-quality');
-                        const clonedGenerateBtn = clonedVideo.querySelector('#generate-video-btn');
-                        
-                        // Sync current values and update IDs
-                        if (clonedVideoFormat && videoFormatSelect) {
-                            clonedVideoFormat.id = 'mobile-video-format';
-                            clonedVideoFormat.value = videoFormatSelect.value;
-                        }
-                        if (clonedVideoEasing && videoEasingSelect) {
-                            clonedVideoEasing.id = 'mobile-video-easing';
-                            clonedVideoEasing.value = videoEasingSelect.value;
-                        }
-                        if (clonedVideoDuration && videoDurationInput) {
-                            clonedVideoDuration.id = 'mobile-video-duration';
-                            clonedVideoDuration.value = videoDurationInput.value;
-                        }
-                        if (clonedVideoFps && videoFpsInput) {
-                            clonedVideoFps.id = 'mobile-video-fps';
-                            clonedVideoFps.value = videoFpsInput.value;
-                        }
-                        if (clonedVideoQuality && videoQualityInput) {
-                            clonedVideoQuality.id = 'mobile-video-quality';
-                            clonedVideoQuality.value = videoQualityInput.value;
-                            
-                            // Update quality label in mobile version
-                            const qualityLabel = clonedVideo.querySelector('#video-quality-label');
-                            if (qualityLabel) {
-                                qualityLabel.id = 'mobile-video-quality-label';
-                                qualityLabel.textContent = `${clonedVideoQuality.value}% (~${computeApproxBitrateMbps(clonedVideoQuality.value, videoFpsInput?.value || 30)} Mbps)`;
-                            }
-                        }
-                        if (clonedGenerateBtn) {
-                            clonedGenerateBtn.id = 'mobile-generate-video-btn';
-                        }
-                        
-                        // Re-bind event listeners with bidirectional sync
-                        if (clonedVideoFormat) {
-                            clonedVideoFormat.addEventListener('change', (e) => {
-                                videoFormatSelect.value = e.target.value;
-                                videoFormatSelect.dispatchEvent(new Event('change'));
-                                saveSettings();
-                            });
-                        }
-                        
-                        if (clonedVideoEasing) {
-                            clonedVideoEasing.addEventListener('change', (e) => {
-                                videoEasingSelect.value = e.target.value;
-                                videoEasingSelect.dispatchEvent(new Event('change'));
-                                saveSettings();
-                            });
-                        }
-                        
-                        if (clonedVideoDuration) {
-                            clonedVideoDuration.addEventListener('input', (e) => {
-                                videoDurationInput.value = e.target.value;
-                                saveSettings();
-                            });
-                        }
-                        
-                        if (clonedVideoFps) {
-                            clonedVideoFps.addEventListener('input', (e) => {
-                                videoFpsInput.value = e.target.value;
-                                // Update quality label in both mobile and desktop
-                                updateQualityLabel();
-                                const mobileQualityLabel = document.getElementById('mobile-video-quality-label');
-                                if (mobileQualityLabel && videoQualityInput) {
-                                    mobileQualityLabel.textContent = `${videoQualityInput.value}% (~${computeApproxBitrateMbps(videoQualityInput.value, e.target.value)} Mbps)`;
-                                }
-                                saveSettings();
-                            });
-                        }
-                        
-                        if (clonedVideoQuality) {
-                            clonedVideoQuality.addEventListener('input', (e) => {
-                                videoQualityInput.value = e.target.value;
-                                // Update quality labels
-                                updateQualityLabel();
-                                const mobileQualityLabel = document.getElementById('mobile-video-quality-label');
-                                if (mobileQualityLabel && videoFpsInput) {
-                                    mobileQualityLabel.textContent = `${e.target.value}% (~${computeApproxBitrateMbps(e.target.value, videoFpsInput.value)} Mbps)`;
-                                }
-                                saveSettings();
-                            });
-                        }
-                        
-                        if (clonedGenerateBtn) {
-                            clonedGenerateBtn.addEventListener('click', async () => {
-                                toggleBottomSheet(); // Close sheet first
-                                await new Promise(resolve => setTimeout(resolve, 300)); // Wait for sheet to close
-                                // Trigger original generate button
-                                if (generateVideoBtn) generateVideoBtn.click();
-                            });
-                        }
+                    const src = videoSettings.querySelector('#video-content .p-6');
+                    if (src) {
+                        mobileVideoContent.innerHTML = '';
+                        mobileVideoContent.appendChild(src);
                     }
                 }
-
-                // Recreate icons for cloned content
-                lucide.createIcons();
+                try { lucide.createIcons(); } catch(_) {}
             };
 
             // Event listeners for bottom sheet
